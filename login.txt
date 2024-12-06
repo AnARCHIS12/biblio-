@@ -1,2 +1,2 @@
-Email : admin@bibliotech.fr
-Mot de passe : admin123
+Email : admin
+Mot de passe : admin
