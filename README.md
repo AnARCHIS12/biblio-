@@ -98,13 +98,7 @@ BiblioTech est une application web de gestion de bibliothèque moderne avec une 
 - Mots de passe hashés
 - Protection des routes administratives
 
-## 🎯 Roadmap
 
-- [ ] Système de réservation avancé
-- [ ] Notifications par email
-- [ ] API REST
-- [ ] Application mobile
-- [ ] Système de recommandations
 
 ## 📝 Licence
 
