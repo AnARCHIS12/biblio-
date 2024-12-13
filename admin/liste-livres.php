@@ -5,7 +5,10 @@ requireAdmin();
 // Suppression d'un livre
 if (isset($_POST['supprimer']) && isset($_POST['nolivre'])) {
     try {
-        // Vérifier si le livre n'est pas emprunté
+        // Démarrer une transaction
+        $pdo->beginTransaction();
+
+        // Vérifier si le livre n'est pas actuellement emprunté
         $stmt = $pdo->prepare("
             SELECT COUNT(*) as nb_emprunts 
             FROM emprunter 
@@ -16,7 +19,12 @@ if (isset($_POST['supprimer']) && isset($_POST['nolivre'])) {
 
         if ($emprunts['nb_emprunts'] > 0) {
             $_SESSION['error_message'] = "Impossible de supprimer ce livre car il est actuellement emprunté.";
+            $pdo->rollBack();
         } else {
+            // Supprimer d'abord tous les enregistrements d'emprunts passés
+            $stmt = $pdo->prepare("DELETE FROM emprunter WHERE nolivre = ?");
+            $stmt->execute([$_POST['nolivre']]);
+
             // Supprimer l'image associée si elle existe
             $stmt = $pdo->prepare("SELECT image FROM livre WHERE nolivre = ?");
             $stmt->execute([$_POST['nolivre']]);
@@ -29,10 +37,15 @@ if (isset($_POST['supprimer']) && isset($_POST['nolivre'])) {
             // Supprimer le livre
             $stmt = $pdo->prepare("DELETE FROM livre WHERE nolivre = ?");
             if ($stmt->execute([$_POST['nolivre']])) {
+                $pdo->commit();
                 $_SESSION['success_message'] = "Le livre a été supprimé avec succès.";
+            } else {
+                $pdo->rollBack();
+                $_SESSION['error_message'] = "Erreur lors de la suppression du livre.";
             }
         }
     } catch(PDOException $e) {
+        $pdo->rollBack();
         $_SESSION['error_message'] = "Erreur lors de la suppression du livre : " . $e->getMessage();
     }
 }

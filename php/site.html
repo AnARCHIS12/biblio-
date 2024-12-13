@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produit - Boutique en ligne</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- En-tête -->
+    <header>
+        <nav>
+            <ul>
+                <li><a href="#">Accueil</a></li>
+                <li><a href="#">Produits</a></li>
+                <li><a href="#">Panier</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Page produit -->
+    <section class="product">
+        <div class="product-image">
+            <img src="image-produit.jpg" alt="Produit Example">
+        </div>
+        <div class="product-details">
+            <h1>Nom du produit</h1>
+            <p class="price">€29.99</p>
+            <p class="description">Description détaillée du produit. Excellente qualité, idéal pour... </p>
+            <form action="panier.html" method="POST">
+                <label for="quantity">Quantité:</label>
+                <input type="number" id="quantity" name="quantity" min="1" value="1">
+                <button type="submit" class="add-to-cart">Ajouter au panier</button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Boutique en ligne</p>
+    </footer>
+</body>
+</html>
