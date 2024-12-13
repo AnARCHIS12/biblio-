@@ -110,7 +110,7 @@ try {
                                 par <?php echo htmlspecialchars($livre['auteur_prenom'] . ' ' . $livre['auteur_nom']); ?>
                             </p>
                             <?php if ($livre['resume']): ?>
-                                <p class="card-text"><?php echo nl2br(htmlspecialchars($livre['resume'])); ?></p>
+                                <p class="card-text text-justify" style="white-space: pre-wrap;"><?php echo htmlspecialchars($livre['resume']); ?></p>
                             <?php endif; ?>
                             <p class="card-text">
                                 <small class="text-muted">

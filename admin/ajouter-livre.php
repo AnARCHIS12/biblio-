@@ -10,11 +10,11 @@ if (!file_exists($upload_dir)) {
 
 // Traitement du formulaire d'ajout de livre
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $titre = filter_input(INPUT_POST, 'titre', FILTER_SANITIZE_STRING);
+    $titre = trim($_POST['titre'] ?? '');
     $anneeparution = filter_input(INPUT_POST, 'anneeparution', FILTER_SANITIZE_NUMBER_INT);
-    $resume = filter_input(INPUT_POST, 'resume', FILTER_SANITIZE_STRING);
-    $auteur_nom = filter_input(INPUT_POST, 'auteur_nom', FILTER_SANITIZE_STRING);
-    $auteur_prenom = filter_input(INPUT_POST, 'auteur_prenom', FILTER_SANITIZE_STRING);
+    $resume = trim($_POST['resume'] ?? '');
+    $auteur_nom = trim($_POST['auteur_nom'] ?? '');
+    $auteur_prenom = trim($_POST['auteur_prenom'] ?? '');
     $image_path = null;
 
     // Traitement de l'upload d'image
@@ -45,22 +45,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->beginTransaction();
 
         // Vérifier si l'auteur existe déjà
-        $stmt = $pdo->prepare("SELECT noauteur FROM auteur WHERE nom = ? AND prenom = ?");
-        $stmt->execute([$auteur_nom, $auteur_prenom]);
+        $stmt = $pdo->prepare("SELECT noauteur FROM auteur WHERE nom = :nom AND prenom = :prenom");
+        $stmt->bindParam(':nom', $auteur_nom);
+        $stmt->bindParam(':prenom', $auteur_prenom);
+        $stmt->execute();
         $auteur = $stmt->fetch();
 
         if ($auteur) {
             $noauteur = $auteur['noauteur'];
         } else {
             // Créer un nouvel auteur
-            $stmt = $pdo->prepare("INSERT INTO auteur (nom, prenom) VALUES (?, ?)");
-            $stmt->execute([$auteur_nom, $auteur_prenom]);
+            $stmt = $pdo->prepare("INSERT INTO auteur (nom, prenom) VALUES (:nom, :prenom)");
+            $stmt->bindParam(':nom', $auteur_nom);
+            $stmt->bindParam(':prenom', $auteur_prenom);
+            $stmt->execute();
             $noauteur = $pdo->lastInsertId();
         }
 
         // Ajouter le livre avec l'image
-        $stmt = $pdo->prepare("INSERT INTO livre (titre, anneeparution, resume, noauteur, image) VALUES (?, ?, ?, ?, ?)");
-        if ($stmt->execute([$titre, $anneeparution, $resume, $noauteur, $image_path])) {
+        $stmt = $pdo->prepare("INSERT INTO livre (titre, anneeparution, resume, noauteur, image) VALUES (:titre, :anneeparution, :resume, :noauteur, :image)");
+        $stmt->bindParam(':titre', $titre);
+        $stmt->bindParam(':anneeparution', $anneeparution);
+        $stmt->bindParam(':resume', $resume);
+        $stmt->bindParam(':noauteur', $noauteur);
+        $stmt->bindParam(':image', $image_path);
+        if ($stmt->execute()) {
             // Valider la transaction
             $pdo->commit();
             $_SESSION['success_message'] = "Le livre a été ajouté avec succès !";

@@ -91,7 +91,7 @@ try {
                             </p>
                             <?php if ($livre['resume']): ?>
                                 <h5 class="mb-2">Résumé</h5>
-                                <p class="card-text"><?php echo nl2br(htmlspecialchars($livre['resume'])); ?></p>
+                                <p class="card-text text-justify" style="white-space: pre-wrap;"><?php echo htmlspecialchars($livre['resume']); ?></p>
                             <?php endif; ?>
                             <div class="mt-4">
                                 <p class="mb-2">

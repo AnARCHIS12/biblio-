@@ -4,6 +4,10 @@ require_once 'includes/authentification.php';
 require_once 'includes/header.php';
 ?>
 
+<!-- Ajout des liens CSS et JS de Swiper -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+
 <div class="container py-4">
     <?php displayMessages(); ?>
 
@@ -25,36 +29,79 @@ require_once 'includes/header.php';
                 </form>
             </div>
 
-            <!-- Liste des livres -->
-            <?php
-            $query = "SELECT l.*, a.nom as nom_auteur, a.prenom as prenom_auteur 
-                     FROM livre l 
-                     JOIN auteur a ON l.noauteur = a.noauteur 
-                     ORDER BY l.dateajout DESC";
-            $stmt = $pdo->query($query);
-            while ($livre = $stmt->fetch()) {
-                ?>
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title"><?= htmlspecialchars($livre['titre']) ?></h5>
-                        <h6 class="card-subtitle mb-2">Par <?= htmlspecialchars($livre['prenom_auteur'] . ' ' . $livre['nom_auteur']) ?></h6>
-                        <p class="card-text">
-                            <small class="text-muted">Année : <?= htmlspecialchars($livre['anneeparution']) ?></small>
-                        </p>
-                        <?php if (!empty($livre['resume'])): ?>
-                            <p class="card-text"><?= htmlspecialchars($livre['resume']) ?></p>
-                        <?php endif; ?>
-                        <div class="btn-group">
-                            <a href="livre.php?id=<?= $livre['nolivre'] ?>" class="btn btn-primary">Voir plus</a>
-                            <?php if (isLoggedIn()): ?>
-                                <a href="emprunter.php?id=<?= $livre['nolivre'] ?>" class="btn btn-outline-primary">Emprunter</a>
-                            <?php endif; ?>
+            <!-- Swiper pour les livres -->
+            <div class="swiper mySwiper">
+                <div class="swiper-wrapper">
+                    <?php
+                    $query = "SELECT l.*, a.nom as nom_auteur, a.prenom as prenom_auteur 
+                    FROM livre l 
+                    JOIN auteur a ON l.noauteur = a.noauteur 
+                    ORDER BY l.dateajout DESC";
+                    $stmt = $pdo->query($query);
+                    while ($livre = $stmt->fetch()): ?>
+                        <div class="swiper-slide">
+                            <div class="card">
+                                <div class="row g-0">
+                                    <div class="col-md-4">
+                                        <?php if ($livre['image']): ?>
+                                            <img src="<?= htmlspecialchars($livre['image']) ?>" 
+                                                 class="img-fluid rounded-start h-100 w-100 object-fit-cover" 
+                                                 alt="Couverture de <?= htmlspecialchars($livre['titre']) ?>">
+                                        <?php else: ?>
+                                            <div class="bg-light h-100 d-flex align-items-center justify-content-center p-4">
+                                                <i class="fas fa-book fa-3x text-muted"></i>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><?= htmlspecialchars($livre['titre']) ?></h5>
+                                            <h6 class="card-subtitle mb-2 text-muted">
+                                                Par <?= htmlspecialchars($livre['prenom_auteur'] . ' ' . $livre['nom_auteur']) ?>
+                                            </h6>
+                                            <p class="card-text">
+                                                <small class="text-muted">Année : <?= htmlspecialchars($livre['anneeparution']) ?></small>
+                                            </p>
+                                            <?php if (!empty($livre['resume'])): ?>
+                                                <p class="card-text"><?= nl2br(htmlspecialchars($livre['resume'])) ?></p>
+                                            <?php endif; ?>
+                                            <div class="mt-3">
+                                                <a href="livre.php?id=<?= $livre['nolivre'] ?>" class="btn btn-primary">Voir plus</a>
+                                                <?php if (isLoggedIn()): ?>
+                                                    <a href="emprunter.php?id=<?= $livre['nolivre'] ?>" class="btn btn-outline-primary">Emprunter</a>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    <?php endwhile; ?>
                 </div>
-                <?php
-            }
-            ?>
+                <div class="swiper-pagination"></div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+            </div>
+
+            <!-- Style pour le slider -->
+          
+
+            <!-- Script pour initialiser Swiper -->
+            <script>
+                var swiper = new Swiper(".mySwiper", {
+                    slidesPerView: 1,
+                    spaceBetween: 30,
+                    loop: true,
+                    pagination: {
+                        el: ".swiper-pagination",
+                        clickable: true,
+                    },
+                    navigation: {
+                        nextEl: ".swiper-button-next",
+                        prevEl: ".swiper-button-prev",
+                    },
+                });
+            </script>
         </div>
 
         <!-- Sidebar droite -->
@@ -117,8 +164,4 @@ require_once 'includes/header.php';
     </div>
 </div>
 
-<?php
-require_once 'includes/footer.php';
-?>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://kit.fontawesome.com/a076d05399.js"></script>
+<?php require_once 'includes/footer.php'; ?>

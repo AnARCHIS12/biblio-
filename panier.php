@@ -25,12 +25,21 @@ if (isset($_POST['emprunter']) && !empty($_SESSION['panier'])) {
     try {
         $pdo->beginTransaction();
         
-        $date_emprunt = date('Y-m-d');
-        $user_mel = $_SESSION['user_id'];
+        // Récupérer le noutilisateur à partir de l'email
+        $stmt = $pdo->prepare("SELECT noutilisateur FROM utilisateur WHERE mel = ?");
+        $stmt->execute([$_SESSION['mel']]);
+        $user = $stmt->fetch();
+        
+        if (!$user) {
+            throw new Exception("Utilisateur non trouvé.");
+        }
+        
+        $date_emprunt = date('Y-m-d H:i:s'); // Format datetime complet
+        $noutilisateur = $user['noutilisateur'];
         
         // Vérifier si l'utilisateur n'a pas déjà emprunté ces livres
-        $stmt = $pdo->prepare("SELECT nolivre FROM emprunter WHERE mel = ? AND dateretour IS NULL");
-        $stmt->execute([$user_mel]);
+        $stmt = $pdo->prepare("SELECT nolivre FROM emprunter WHERE noutilisateur = ? AND dateretoureffectif IS NULL");
+        $stmt->execute([$noutilisateur]);
         $emprunts_actuels = $stmt->fetchAll(PDO::FETCH_COLUMN);
         
         $livres_deja_empruntes = array_intersect($emprunts_actuels, $_SESSION['panier']);
@@ -39,11 +48,25 @@ if (isset($_POST['emprunter']) && !empty($_SESSION['panier'])) {
             throw new Exception("Vous avez déjà emprunté certains de ces livres.");
         }
         
-        // Insérer les emprunts
-        $stmt = $pdo->prepare("INSERT INTO emprunter (mel, nolivre, dateemprunt) VALUES (?, ?, ?)");
+        // Vérifier si l'emprunt existe déjà
+        $stmt = $pdo->prepare("INSERT INTO emprunter (noutilisateur, nolivre, dateemprunt) 
+                              SELECT ?, ?, ? 
+                              WHERE NOT EXISTS (
+                                  SELECT 1 FROM emprunter 
+                                  WHERE noutilisateur = ? 
+                                  AND nolivre = ? 
+                                  AND dateemprunt = ?
+                              )");
         
         foreach ($_SESSION['panier'] as $nolivre) {
-            $stmt->execute([$user_mel, $nolivre, $date_emprunt]);
+            $stmt->execute([
+                $noutilisateur, 
+                $nolivre, 
+                $date_emprunt,
+                $noutilisateur,
+                $nolivre,
+                $date_emprunt
+            ]);
         }
         
         $pdo->commit();
@@ -112,7 +135,9 @@ include 'includes/header.php';
                                             <p class="mb-1 text-muted">
                                                 Par <?php echo htmlspecialchars($livre['prenom_auteur'] . ' ' . $livre['nom_auteur']); ?>
                                             </p>
-                                            <small>ISBN: <?php echo htmlspecialchars($livre['isbn13']); ?></small>
+                                            <?php if (isset($livre['isbn13'])): ?>
+                                                <small>ISBN: <?php echo htmlspecialchars($livre['isbn13']); ?></small>
+                                            <?php endif; ?>
                                         </div>
                                         <form method="post" class="ms-3">
                                             <input type="hidden" name="nolivre" value="<?php echo $livre['nolivre']; ?>">

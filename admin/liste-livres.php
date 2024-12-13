@@ -25,6 +25,12 @@ if (isset($_POST['supprimer']) && isset($_POST['nolivre'])) {
             $stmt = $pdo->prepare("DELETE FROM emprunter WHERE nolivre = ?");
             $stmt->execute([$_POST['nolivre']]);
 
+            // Récupérer l'auteur du livre
+            $stmt = $pdo->prepare("SELECT noauteur FROM livre WHERE nolivre = ?");
+            $stmt->execute([$_POST['nolivre']]);
+            $livre_info = $stmt->fetch();
+            $noauteur = $livre_info['noauteur'];
+
             // Supprimer l'image associée si elle existe
             $stmt = $pdo->prepare("SELECT image FROM livre WHERE nolivre = ?");
             $stmt->execute([$_POST['nolivre']]);
@@ -37,6 +43,17 @@ if (isset($_POST['supprimer']) && isset($_POST['nolivre'])) {
             // Supprimer le livre
             $stmt = $pdo->prepare("DELETE FROM livre WHERE nolivre = ?");
             if ($stmt->execute([$_POST['nolivre']])) {
+                // Vérifier si l'auteur a d'autres livres
+                $stmt = $pdo->prepare("SELECT COUNT(*) as nb_livres FROM livre WHERE noauteur = ?");
+                $stmt->execute([$noauteur]);
+                $result = $stmt->fetch();
+
+                // Si l'auteur n'a plus de livres, le supprimer
+                if ($result['nb_livres'] == 0) {
+                    $stmt = $pdo->prepare("DELETE FROM auteur WHERE noauteur = ?");
+                    $stmt->execute([$noauteur]);
+                }
+
                 $pdo->commit();
                 $_SESSION['success_message'] = "Le livre a été supprimé avec succès.";
             } else {
@@ -115,7 +132,8 @@ try {
                                                 data-bs-toggle="popover" 
                                                 data-bs-trigger="hover" 
                                                 title="Résumé" 
-                                                data-bs-content="<?php echo htmlspecialchars($livre['resume']); ?>">
+                                                data-bs-content="<?php echo htmlspecialchars(str_replace('"', '&quot;', $livre['resume'])); ?>"
+                                                data-bs-html="true">
                                             <i class="fas fa-info-circle"></i>
                                         </button>
                                     <?php endif; ?>
