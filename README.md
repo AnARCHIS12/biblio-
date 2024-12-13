@@ -1,4 +1,4 @@
-# 🌟 BiblioTech - Bibliothèque Numérique Cyberpunk
+# 🌟 BiblioTech - Bibliothèque Numérique
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![PHP Version](https://img.shields.io/badge/PHP-8.0%2B-purple.svg)
