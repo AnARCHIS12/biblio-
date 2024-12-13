@@ -12,7 +12,7 @@ BiblioTech est une application web de gestion de bibliothèque moderne avec une 
 
 - 📚 Catalogue de livres complet avec recherche avancée
 - 👥 Gestion des utilisateurs et des emprunts
-- 🎨 Interface utilisateur cyberpunk moderne
+- 🎨 Interface utilisateur  moderne
 - 🔐 Système d'authentification sécurisé
 - 👨‍💼 Panel d'administration complet
 - 📱 Design responsive (mobile-first)
