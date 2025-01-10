@@ -13,7 +13,7 @@ require_once 'includes/header.php';
                         <h2 class="h4">1. Informations légales</h2>
                         <p>
                             BiblioTech est un service de gestion de bibliothèque développé dans le cadre d'un projet éducatif.
-                            Ce site est hébergé localement sur un serveur XAMPP.
+                            Ce site est hébergé  sur un serveur XAMPP.
                         </p>
                     </section>
 
@@ -42,8 +42,8 @@ require_once 'includes/header.php';
                     <section class="mb-4">
                         <h2 class="h4">4. Propriété intellectuelle</h2>
                         <p>
-                            L'ensemble du contenu de ce site (textes, images, fonctionnalités) est protégé 
-                            par le droit d'auteur. Toute reproduction sans autorisation préalable est interdite.
+                            L'ensemble du contenu de ce site (textes, images, fonctionnalités) est  
+                             libre de droit. Toute reproduction est autorisé par license MIT.
                         </p>
                     </section>
 

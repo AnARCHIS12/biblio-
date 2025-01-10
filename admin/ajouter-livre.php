@@ -16,6 +16,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $auteur_nom = trim($_POST['auteur_nom'] ?? '');
     $auteur_prenom = trim($_POST['auteur_prenom'] ?? '');
     $image_path = null;
+    $isbn13 = trim($_POST['isbn13'] ?? '');
+    $categorie = trim($_POST['categorie'] ?? '');
 
     // Traitement de l'upload d'image
     if (isset($_FILES['cover']) && $_FILES['cover']['error'] === UPLOAD_ERR_OK) {
@@ -44,6 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Commencer une transaction
         $pdo->beginTransaction();
 
+        // Récupérer et valider l'ISBN13
+        if (!preg_match('/^[0-9]{13}$/', $isbn13)) {
+            throw new Exception("L'ISBN13 doit contenir exactement 13 chiffres.");
+        }
+
         // Vérifier si l'auteur existe déjà
         $stmt = $pdo->prepare("SELECT noauteur FROM auteur WHERE nom = :nom AND prenom = :prenom");
         $stmt->bindParam(':nom', $auteur_nom);
@@ -63,12 +70,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Ajouter le livre avec l'image
-        $stmt = $pdo->prepare("INSERT INTO livre (titre, anneeparution, resume, noauteur, image) VALUES (:titre, :anneeparution, :resume, :noauteur, :image)");
+        $stmt = $pdo->prepare("INSERT INTO livre (isbn13, titre, anneeparution, resume, noauteur, image, categorie) 
+                              VALUES (:isbn13, :titre, :anneeparution, :resume, :noauteur, :image, :categorie)");
+        $stmt->bindParam(':isbn13', $isbn13);
         $stmt->bindParam(':titre', $titre);
         $stmt->bindParam(':anneeparution', $anneeparution);
         $stmt->bindParam(':resume', $resume);
         $stmt->bindParam(':noauteur', $noauteur);
         $stmt->bindParam(':image', $image_path);
+        $stmt->bindParam(':categorie', $categorie);
         if ($stmt->execute()) {
             // Valider la transaction
             $pdo->commit();
@@ -93,6 +103,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="card-body">
             <form method="POST" enctype="multipart/form-data">
                 <div class="mb-3">
+                    <label for="isbn13" class="form-label">ISBN13</label>
+                    <input type="text" class="form-control" id="isbn13" name="isbn13" 
+                           pattern="[0-9]{13}" title="L'ISBN13 doit contenir exactement 13 chiffres" required>
+                </div>
+
+                <div class="mb-3">
                     <label for="titre" class="form-label">Titre du livre</label>
                     <input type="text" class="form-control" id="titre" name="titre" required>
                 </div>
@@ -105,6 +121,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="mb-3">
                     <label for="resume" class="form-label">Résumé</label>
                     <textarea class="form-control" id="resume" name="resume" rows="4"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="categorie" class="form-label">Catégorie</label>
+                    <input type="text" class="form-control" id="categorie" name="categorie" required>
                 </div>
 
                 <div class="row">
